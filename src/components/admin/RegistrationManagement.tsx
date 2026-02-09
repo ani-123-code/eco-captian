@@ -40,7 +40,7 @@ export function RegistrationManagement() {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     loadRequests();
@@ -102,7 +102,7 @@ export function RegistrationManagement() {
 
     setError('');
     setSuccess('');
-    setLoading(true);
+    setSubmitting(true);
 
     try {
       await registrationsAPI.updateStatus(selectedRequest.id, formData.status, formData.admin_notes);
@@ -123,7 +123,7 @@ export function RegistrationManagement() {
     } catch (err: any) {
       setError(err.message || 'Failed to update status');
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -137,7 +137,7 @@ export function RegistrationManagement() {
 
     setError('');
     setSuccess('');
-    setLoading(true);
+    setSubmitting(true);
 
     try {
       await captainsAPI.create(
@@ -165,7 +165,7 @@ export function RegistrationManagement() {
     } catch (err: any) {
       setError(err.message || 'Failed to create captain');
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -469,10 +469,10 @@ export function RegistrationManagement() {
                   </div>
                   <button
                     onClick={handleUpdateStatus}
-                    disabled={loading}
+                    disabled={submitting}
                     className="w-full bg-light-green-500 text-white py-2 rounded-lg font-semibold hover:bg-light-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    {loading ? (
+                    {submitting ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
                         Updating...
@@ -566,10 +566,10 @@ export function RegistrationManagement() {
                   </div>
                   <button
                     onClick={handleCreateCaptain}
-                    disabled={loading}
+                    disabled={submitting}
                     className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    {loading ? (
+                    {submitting ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
                         Creating...
