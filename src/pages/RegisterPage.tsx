@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { UserPlus, Mail, Phone, MapPin, Home, CreditCard, Loader2, CheckCircle2, ArrowLeft, Recycle, Leaf, DollarSign, Shield } from 'lucide-react';
+import { UserPlus, Mail, Phone, MapPin, Home, CreditCard, Loader2, CheckCircle2, ArrowLeft, Recycle, Leaf, DollarSign, Shield, X } from 'lucide-react';
 import { registrationsAPI } from '../lib/api';
 
 export function RegisterPage() {
@@ -15,7 +15,7 @@ export function RegisterPage() {
     upi_id: '',
   });
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,7 +31,7 @@ export function RegisterPage() {
 
     try {
       await registrationsAPI.submit(formData);
-      setSuccess(true);
+      setShowSuccessModal(true);
       setFormData({
         full_name: '',
         email: '',
@@ -48,49 +48,46 @@ export function RegisterPage() {
     }
   };
 
-  if (success) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-light-green-50 to-teal-100 flex items-center justify-center p-3 sm:p-4 lg:p-6">
-        <div className="max-w-md w-full">
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-5 sm:p-6 lg:p-8 text-center">
+  const handleCloseModal = () => {
+    setShowSuccessModal(false);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-light-green-50 to-teal-100 py-6 sm:py-8 px-3 sm:px-4 lg:px-6">
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-5 sm:p-6 lg:p-8 max-w-md w-full relative">
+            <button
+              onClick={handleCloseModal}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="w-5 h-5 sm:w-6 sm:h-6" />
+            </button>
             <div className="flex justify-center mb-4 sm:mb-6">
               <div className="bg-light-green-100 rounded-full p-3 sm:p-4">
                 <CheckCircle2 className="w-10 h-10 sm:w-12 sm:h-12 text-light-green-600" />
               </div>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
-              Registration Submitted!
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 text-center">
+              Submitted
             </h1>
-            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
-              Thank you for your interest in becoming an EcoCaptain! Your registration request has been received and is under review.
+            <p className="text-sm sm:text-base text-gray-700 mb-4 sm:mb-6 text-center font-medium">
+              We will contact you in 24 hours.
             </p>
-            <div className="bg-light-green-50 border border-light-green-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
-              <p className="text-xs sm:text-sm text-gray-700 font-semibold mb-2">What happens next?</p>
-              <ul className="text-xs sm:text-sm text-gray-600 space-y-1 text-left list-disc list-inside">
-                <li>Our team will review your application</li>
-                <li>You'll receive login credentials via email upon approval</li>
-                <li>Start collecting e-waste and earning money</li>
-                <li>Help create a sustainable future</li>
-              </ul>
-            </div>
-            <p className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6">
-              We'll contact you soon to complete the registration process. Welcome to the EcoCaptain family! 🌱
+            <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6 text-center">
+              Thank you for your interest in becoming an EcoCaptain! Your registration request has been received and our team will review it shortly.
             </p>
             <button
-              onClick={() => navigate('/')}
-              className="w-full bg-light-green-500 text-white py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-light-green-600 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base"
+              onClick={handleCloseModal}
+              className="w-full bg-light-green-500 text-white py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-light-green-600 transition-colors text-sm sm:text-base"
             >
-              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              Back to Login
+              Close
             </button>
           </div>
         </div>
-      </div>
-    );
-  }
+      )}
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-light-green-50 to-teal-100 py-6 sm:py-8 px-3 sm:px-4 lg:px-6">
       <div className="max-w-2xl mx-auto">
         <div className="mb-4 sm:mb-6">
           <button
