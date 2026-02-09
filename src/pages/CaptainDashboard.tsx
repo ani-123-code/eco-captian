@@ -48,6 +48,7 @@ function CaptainDashboardContent() {
     numberOfItems: '',
     items: [] as Array<{ productType: string; units: string; weight: string; otherProductName?: string }>,
     location_address: '',
+    google_location_link: '',
   });
   
   // Initialize items array when numberOfItems changes
@@ -409,11 +410,12 @@ function CaptainDashboardContent() {
         description: description.trim(),
         quantity: totalQuantity,
         location_address: uploadForm.location_address.trim() || undefined,
+        google_location_link: uploadForm.google_location_link.trim() || undefined,
         photos: validImageUrls, // Send CloudFront URLs
       });
 
       setSuccess('E-waste uploaded successfully! Admin will review and price it soon.');
-      setUploadForm({ numberOfItems: '', items: [], location_address: '' });
+      setUploadForm({ numberOfItems: '', items: [], location_address: '', google_location_link: '' });
       setSelectedFiles([]);
       setUploadedImageUrls([]);
       setUploadingImages([]);
@@ -709,6 +711,28 @@ function CaptainDashboardContent() {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-light-green-500 focus:border-light-green-500 transition-all bg-white"
                       placeholder="123 Main St, City, State"
                     />
+                  </div>
+
+                  {/* Google Location Link */}
+                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      <MapPin className="w-4 h-4 inline mr-1" />
+                      Google Location Link <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-xs text-gray-600 mb-3">
+                      Copy and paste the Google Maps link for accurate location. Open Google Maps, search for your location, click "Share" → "Copy link", then paste it here.
+                    </p>
+                    <input
+                      type="url"
+                      value={uploadForm.google_location_link}
+                      onChange={(e) => setUploadForm({ ...uploadForm, google_location_link: e.target.value })}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-light-green-500 focus:border-light-green-500 transition-all bg-white"
+                      placeholder="https://maps.google.com/..."
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      Example: https://maps.google.com/?q=19.0760,72.8777
+                    </p>
                   </div>
 
                   <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">

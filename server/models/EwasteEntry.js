@@ -46,6 +46,15 @@ const ewasteEntrySchema = new mongoose.Schema(
       type: Number,
       default: null,
     },
+    currency: {
+      type: String,
+      enum: ['INR', 'USD', 'EUR', 'GBP', 'AED'],
+      default: 'INR',
+    },
+    google_location_link: {
+      type: String,
+      default: null,
+    },
     collection_plan: {
       collection_date: {
         type: Date,

@@ -75,7 +75,7 @@ router.post('/', protect, async (req, res) => {
     console.log('📝 Create e-waste request received');
     console.log('User:', req.user?.email, req.user?.role);
 
-    const { description, quantity, location_address, photos } = req.body;
+    const { description, quantity, location_address, google_location_link, photos } = req.body;
 
     console.log('Request body:', { description, quantity, location_address, photosCount: photos?.length || 0 });
 
@@ -119,6 +119,7 @@ router.post('/', protect, async (req, res) => {
       description: description.trim(),
       quantity: parseFloat(quantity),
       location_address: location_address ? location_address.trim() : null,
+      google_location_link: google_location_link ? google_location_link.trim() : null,
       photos: photoUrls, // CloudFront URLs from upload API
       status: 'Pending',
     });

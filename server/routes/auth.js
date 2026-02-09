@@ -19,12 +19,7 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    console.log('🔐 Login attempt:', { 
-      email, 
-      hasPassword: !!password, 
-      adminEmail: process.env.ADMIN_EMAIL,
-      adminPasswordSet: !!process.env.ADMIN_PASSWORD 
-    });
+    // Login attempt logged (email only, no sensitive data)
 
     if (!email || !password) {
       console.log('❌ Missing email or password');
@@ -37,7 +32,6 @@ router.post('/login', async (req, res) => {
 
       if (!admin) {
         // Create admin user if doesn't exist
-        console.log('Creating admin user...');
         admin = await User.create({
           email: process.env.ADMIN_EMAIL,
           password: process.env.ADMIN_PASSWORD,
@@ -45,13 +39,11 @@ router.post('/login', async (req, res) => {
           role: 'admin',
           balance: 0,
         });
-        console.log('✅ Admin user created successfully');
       } else {
         // Verify password
         const isMatch = await admin.comparePassword(process.env.ADMIN_PASSWORD);
         if (!isMatch) {
           // Update password if it doesn't match
-          console.log('Updating admin password...');
           admin.password = process.env.ADMIN_PASSWORD;
           await admin.save();
         }
@@ -79,18 +71,14 @@ router.post('/login', async (req, res) => {
     const user = await User.findOne({ email: email.toLowerCase() });
 
     if (!user) {
-      console.log('❌ Login failed: User not found for email:', email);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const isMatch = await user.comparePassword(password);
 
     if (!isMatch) {
-      console.log('❌ Login failed: Password mismatch for email:', email);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
-
-    console.log('✅ Login successful for:', user.email, 'Role:', user.role);
     const token = generateToken(user._id);
 
     res.json({

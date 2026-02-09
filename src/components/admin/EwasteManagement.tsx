@@ -28,6 +28,7 @@ export function EwasteManagement() {
   const [modalMode, setModalMode] = useState<'price' | 'pickup' | 'process' | 'collection' | 'status' | 'notes'>('price');
   const [formData, setFormData] = useState({
     price: '',
+    currency: 'INR',
     pickup_date: '',
     pickup_notes: '',
     payment_amount: '',
@@ -123,6 +124,7 @@ export function EwasteManagement() {
     setModalMode(mode);
     setFormData({
       price: entry.price?.toString() || '',
+      currency: entry.currency || 'INR',
       pickup_date: entry.pickup_date ? new Date(entry.pickup_date).toISOString().split('T')[0] : '',
       pickup_notes: entry.pickup_notes || '',
       payment_amount: entry.payment_amount?.toString() || entry.price?.toString() || '',
@@ -141,20 +143,23 @@ export function EwasteManagement() {
   const handleUpdatePrice = async () => {
     if (!selectedEntry) return;
 
-    try {
-      await ewasteAPI.updatePrice(selectedEntry.id, parseFloat(formData.price));
+    setError('');
+    setSuccess('');
 
-      setSuccess('Price updated successfully! Email notification sent to captain.');
+    try {
+      await ewasteAPI.updatePrice(selectedEntry.id, parseFloat(formData.price), formData.currency);
+
+      setSuccess('✅ Price updated successfully! Email notification sent to captain.');
       setShowModal(false);
-      setError('');
       // Immediate refresh
       await loadEntries();
+      
+      // Clear success message after 5 seconds
       setTimeout(() => {
-        loadEntries();
-      }, 2000);
+        setSuccess('');
+      }, 5000);
     } catch (err: any) {
       setError(err.message || 'Failed to update price');
-      setSuccess('');
     }
   };
 
@@ -241,6 +246,9 @@ export function EwasteManagement() {
   const handleUpdateStatus = async () => {
     if (!selectedEntry) return;
 
+    setError('');
+    setSuccess('');
+
     try {
       const result = await ewasteAPI.updateStatus(
         selectedEntry.id,
@@ -250,21 +258,20 @@ export function EwasteManagement() {
 
       // If status was set to "Paid", show special message
       if (formData.status === 'Paid') {
-        setSuccess('Status updated to Paid! Payment processed and captain balance updated. Email notification sent.');
+        setSuccess('✅ Status updated to Paid! Payment processed and captain balance updated. Email notification sent.');
       } else {
-        setSuccess('Status updated successfully! Email notification sent to captain.');
+        setSuccess('✅ Status updated successfully! Email notification sent to captain.');
       }
       setShowModal(false);
-      setError('');
       // Immediate refresh
       await loadEntries();
-      // Also refresh after a short delay to ensure balance updates are reflected everywhere
+      
+      // Clear success message after 5 seconds
       setTimeout(() => {
-        loadEntries();
-      }, 2000);
+        setSuccess('');
+      }, 5000);
     } catch (err: any) {
       setError(err.message || 'Failed to update status');
-      setSuccess('');
     }
   };
 
@@ -471,6 +478,19 @@ export function EwasteManagement() {
                     <div className="flex items-start gap-2 text-sm text-gray-600">
                       <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
                       <span className="break-words">{entry.location_address}</span>
+                    </div>
+                  )}
+                  {entry.google_location_link && (
+                    <div className="flex items-start gap-2 text-sm text-blue-600">
+                      <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <a 
+                        href={entry.google_location_link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="underline hover:text-blue-800 break-words"
+                      >
+                        View on Google Maps
+                      </a>
                     </div>
                   )}
                   {entry.price && (
@@ -740,7 +760,7 @@ export function EwasteManagement() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Price (₹)
+                    Price *
                   </label>
                   <input
                     type="number"
@@ -749,7 +769,24 @@ export function EwasteManagement() {
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-light-green-500 focus:border-transparent"
+                    placeholder="Enter price"
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Currency *
+                  </label>
+                  <select
+                    value={formData.currency}
+                    onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-light-green-500 focus:border-transparent"
+                  >
+                    <option value="INR">INR (₹) - Indian Rupee</option>
+                    <option value="USD">USD ($) - US Dollar</option>
+                    <option value="EUR">EUR (€) - Euro</option>
+                    <option value="GBP">GBP (£) - British Pound</option>
+                    <option value="AED">AED (د.إ) - UAE Dirham</option>
+                  </select>
                 </div>
                 <div className="flex gap-3 pt-4">
                   <button

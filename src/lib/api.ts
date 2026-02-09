@@ -40,7 +40,6 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
 export const authAPI = {
   login: async (email: string, password: string) => {
     try {
-      console.log('Attempting login for:', email);
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: {
@@ -51,18 +50,15 @@ export const authAPI = {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Login failed' }));
-        console.error('Login failed:', response.status, errorData);
         throw new Error(errorData.error || `Login failed: ${response.status}`);
       }
 
       const data = await response.json();
       if (data.token) {
         localStorage.setItem('token', data.token);
-        console.log('Login successful, token saved');
       }
       return data;
     } catch (error: any) {
-      console.error('Login error:', error);
       throw error;
     }
   },
@@ -109,17 +105,17 @@ export const ewasteAPI = {
     return apiRequest('/ewaste');
   },
 
-  create: async (data: { description: string; quantity: string; location_address?: string; photos: string[] }) => {
+  create: async (data: { description: string; quantity: string; location_address?: string; google_location_link?: string; photos: string[] }) => {
     return apiRequest('/ewaste', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
 
-  updatePrice: async (id: string, price: number) => {
+  updatePrice: async (id: string, price: number, currency?: string) => {
     return apiRequest(`/ewaste/${id}/price`, {
       method: 'PUT',
-      body: JSON.stringify({ price }),
+      body: JSON.stringify({ price, currency }),
     });
   },
 
@@ -209,11 +205,13 @@ export type EwasteEntry = {
   description: string;
   quantity: number;
   location_address: string | null;
+  google_location_link?: string | null;
   location_lat: number | null;
   location_lng: number | null;
   photos: string[];
   status: 'Pending' | 'Reviewed' | 'Priced' | 'Collection Planned' | 'Pickup Scheduled' | 'Collected' | 'Processed' | 'Payment Initiated' | 'Paid';
   price: number | null;
+  currency?: 'INR' | 'USD' | 'EUR' | 'GBP' | 'AED';
   pickup_date: string | null;
   pickup_notes: string | null;
   payment_amount: number | null;

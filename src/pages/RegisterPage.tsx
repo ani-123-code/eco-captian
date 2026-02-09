@@ -32,9 +32,8 @@ export function RegisterPage() {
 
     try {
       const response = await registrationsAPI.submit(formData);
-      console.log('Registration response:', response);
       
-      // Clear form
+      // Clear form first
       setFormData({
         full_name: '',
         email: '',
@@ -45,14 +44,17 @@ export function RegisterPage() {
         upi_id: '',
       });
       
-      // Show success modal
-      setShowSuccessModal(true);
-      setError('');
+      // Stop loading before showing modal
+      setLoading(false);
+      
+      // Small delay to ensure state updates properly
+      setTimeout(() => {
+        setShowSuccessModal(true);
+        setError('');
+      }, 100);
     } catch (err: any) {
-      console.error('Registration error:', err);
       setError(err.message || 'Failed to submit registration. Please try again.');
       setShowSuccessModal(false);
-    } finally {
       setLoading(false);
     }
   };
