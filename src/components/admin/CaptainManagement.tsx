@@ -19,6 +19,7 @@ export function CaptainManagement() {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     loadCaptains();
@@ -90,6 +91,7 @@ export function CaptainManagement() {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setSubmitting(true);
 
     try {
       await captainsAPI.create(
@@ -103,15 +105,19 @@ export function CaptainManagement() {
         formData.address
       );
 
-      setSuccess('Captain created successfully! Credentials email sent to captain.');
+      setSuccess('✅ Captain created successfully! Credentials have been sent via email.');
       handleCloseModal();
       // Immediate refresh
       await loadCaptains();
+      
+      // Clear success message after 5 seconds
       setTimeout(() => {
-        loadCaptains();
-      }, 2000);
+        setSuccess('');
+      }, 5000);
     } catch (err: any) {
       setError(err.message || 'Failed to create captain');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -121,6 +127,7 @@ export function CaptainManagement() {
 
     setError('');
     setSuccess('');
+    setSubmitting(true);
 
     try {
       const updateData: any = {
@@ -139,16 +146,19 @@ export function CaptainManagement() {
 
       await captainsAPI.update(editingCaptain.id, updateData);
 
-      setSuccess('Captain updated successfully!');
+      setSuccess('✅ Captain updated successfully!');
       handleCloseModal();
       // Immediate refresh
       await loadCaptains();
-      // Also refresh after a short delay to ensure balance updates are reflected
+      
+      // Clear success message after 5 seconds
       setTimeout(() => {
-        loadCaptains();
-      }, 2000);
+        setSuccess('');
+      }, 5000);
     } catch (err: any) {
       setError(err.message || 'Failed to update captain');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -545,9 +555,17 @@ export function CaptainManagement() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-light-green-600 text-white rounded-lg hover:bg-light-green-700 transition-colors"
+                  disabled={submitting}
+                  className="flex-1 px-4 py-2 bg-light-green-600 text-white rounded-lg hover:bg-light-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {editingCaptain ? 'Update Captain' : 'Create Captain'}
+                  {submitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      {editingCaptain ? 'Updating...' : 'Creating...'}
+                    </>
+                  ) : (
+                    editingCaptain ? 'Update Captain' : 'Create Captain'
+                  )}
                 </button>
               </div>
             </form>

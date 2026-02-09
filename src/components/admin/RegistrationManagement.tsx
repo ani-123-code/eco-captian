@@ -40,6 +40,7 @@ export function RegistrationManagement() {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     loadRequests();
@@ -99,22 +100,30 @@ export function RegistrationManagement() {
   const handleUpdateStatus = async () => {
     if (!selectedRequest) return;
 
+    setError('');
+    setSuccess('');
+    setLoading(true);
+
     try {
       await registrationsAPI.updateStatus(selectedRequest.id, formData.status, formData.admin_notes);
       
       if (formData.status === 'Approved') {
-        setSuccess('Registration approved! Captain account has been created and credentials have been sent via email.');
+        setSuccess('✅ Registration approved! Captain account has been created and credentials have been sent via email.');
       } else {
-        setSuccess('Status updated successfully!');
+        setSuccess('✅ Status updated successfully!');
       }
       
       handleCloseModal();
       await loadRequests();
+      
+      // Clear success message after 5 seconds
       setTimeout(() => {
-        loadRequests();
-      }, 2000);
+        setSuccess('');
+      }, 5000);
     } catch (err: any) {
       setError(err.message || 'Failed to update status');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -125,6 +134,10 @@ export function RegistrationManagement() {
       setError('Email, password, and full name are required');
       return;
     }
+
+    setError('');
+    setSuccess('');
+    setLoading(true);
 
     try {
       await captainsAPI.create(
@@ -141,14 +154,18 @@ export function RegistrationManagement() {
       // Update registration request status to Approved
       await registrationsAPI.updateStatus(selectedRequest.id, 'Approved', 'Captain account created successfully');
 
-      setSuccess('Captain created successfully! Credentials sent via email.');
+      setSuccess('✅ Captain created successfully! Credentials have been sent via email.');
       handleCloseModal();
       await loadRequests();
+      
+      // Clear success message after 5 seconds
       setTimeout(() => {
-        loadRequests();
-      }, 2000);
+        setSuccess('');
+      }, 5000);
     } catch (err: any) {
       setError(err.message || 'Failed to create captain');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -452,9 +469,17 @@ export function RegistrationManagement() {
                   </div>
                   <button
                     onClick={handleUpdateStatus}
-                    className="w-full bg-light-green-500 text-white py-2 rounded-lg font-semibold hover:bg-light-green-600 transition-colors"
+                    disabled={loading}
+                    className="w-full bg-light-green-500 text-white py-2 rounded-lg font-semibold hover:bg-light-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    Update Status
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Updating...
+                      </>
+                    ) : (
+                      'Update Status'
+                    )}
                   </button>
                 </>
               )}
@@ -541,10 +566,20 @@ export function RegistrationManagement() {
                   </div>
                   <button
                     onClick={handleCreateCaptain}
-                    className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
+                    disabled={loading}
+                    className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    <UserPlus className="w-4 h-4" />
-                    Create Captain Account
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="w-4 h-4" />
+                        Create Captain Account
+                      </>
+                    )}
                   </button>
                 </>
               )}

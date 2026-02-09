@@ -22,6 +22,7 @@ export function RegisterPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
+    setShowSuccessModal(false);
 
     if (!formData.full_name || !formData.email || !formData.phone || !formData.locality) {
       setError('Please fill in all required fields (Name, Email, Phone, Locality)');
@@ -30,8 +31,10 @@ export function RegisterPage() {
     }
 
     try {
-      await registrationsAPI.submit(formData);
-      setShowSuccessModal(true);
+      const response = await registrationsAPI.submit(formData);
+      console.log('Registration response:', response);
+      
+      // Clear form
       setFormData({
         full_name: '',
         email: '',
@@ -41,8 +44,14 @@ export function RegisterPage() {
         address: '',
         upi_id: '',
       });
+      
+      // Show success modal
+      setShowSuccessModal(true);
+      setError('');
     } catch (err: any) {
+      console.error('Registration error:', err);
       setError(err.message || 'Failed to submit registration. Please try again.');
+      setShowSuccessModal(false);
     } finally {
       setLoading(false);
     }
