@@ -252,20 +252,37 @@ export const registrationsAPI = {
     address?: string;
     upi_id?: string;
   }) => {
-    const response = await fetch(`${API_URL}/registrations`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
+    try {
+      const response = await fetch(`${API_URL}/registrations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Registration failed' }));
-      throw new Error(error.error || 'Registration failed');
+      // Handle 201 Created or 200 OK
+      if (response.status === 201 || response.status === 200) {
+        const result = await response.json().catch(() => ({}));
+        return result;
+      }
+
+      // Handle errors
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Registration failed' }));
+        throw new Error(error.error || `Registration failed: ${response.status}`);
+      }
+
+      // Fallback
+      return await response.json();
+    } catch (error: any) {
+      // Re-throw if it's already an Error
+      if (error instanceof Error) {
+        throw error;
+      }
+      // Otherwise wrap it
+      throw new Error(error.message || 'Registration failed. Please try again.');
     }
-
-    return response.json();
   },
   getAll: async (status?: string) => {
     const query = status ? `?status=${status}` : '';

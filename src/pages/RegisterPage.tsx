@@ -33,25 +33,28 @@ export function RegisterPage() {
     try {
       const response = await registrationsAPI.submit(formData);
       
-      // Clear form first
-      setFormData({
-        full_name: '',
-        email: '',
-        phone: '',
-        locality: '',
-        society: '',
-        address: '',
-        upi_id: '',
-      });
-      
-      // Stop loading before showing modal
-      setLoading(false);
-      
-      // Small delay to ensure state updates properly
-      setTimeout(() => {
+      // Check if response indicates success
+      if (response && (response.success || response.id || response.message)) {
+        // Clear form
+        setFormData({
+          full_name: '',
+          email: '',
+          phone: '',
+          locality: '',
+          society: '',
+          address: '',
+          upi_id: '',
+        });
+        
+        // Stop loading
+        setLoading(false);
+        
+        // Show success modal immediately
         setShowSuccessModal(true);
         setError('');
-      }, 100);
+      } else {
+        throw new Error('Unexpected response from server');
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to submit registration. Please try again.');
       setShowSuccessModal(false);
