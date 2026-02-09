@@ -41,15 +41,13 @@ router.post('/', async (req, res) => {
       status: 'Pending',
     });
 
-    // Send confirmation email
-    try {
-      await sendRegistrationConfirmation(email, full_name);
-    } catch (emailError) {
+    // Send confirmation email (non-blocking - don't wait for it)
+    sendRegistrationConfirmation(email, full_name).catch((emailError) => {
       console.error('Failed to send registration confirmation email:', emailError);
       // Don't fail the request if email fails
-    }
+    });
 
-    console.log(`✅ New registration request created: ${email}`);
+    // Return success immediately (don't wait for email)
     res.status(201).json({
       success: true,
       message: 'Registration request submitted successfully! We will contact you soon.',

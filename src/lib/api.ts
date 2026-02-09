@@ -252,6 +252,10 @@ export const registrationsAPI = {
     address?: string;
     upi_id?: string;
   }) => {
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
     try {
       const response = await fetch(`${API_URL}/registrations`, {
         method: 'POST',
@@ -259,7 +263,10 @@ export const registrationsAPI = {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       // Handle 201 Created or 200 OK
       if (response.status === 201 || response.status === 200) {
@@ -276,6 +283,13 @@ export const registrationsAPI = {
       // Fallback
       return await response.json();
     } catch (error: any) {
+      clearTimeout(timeoutId);
+      
+      // Handle abort (timeout)
+      if (error.name === 'AbortError') {
+        throw new Error('Request timed out. Please check your connection and try again.');
+      }
+      
       // Re-throw if it's already an Error
       if (error instanceof Error) {
         throw error;

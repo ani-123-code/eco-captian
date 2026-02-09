@@ -33,32 +33,29 @@ export function RegisterPage() {
     try {
       const response = await registrationsAPI.submit(formData);
       
-      // Check if response indicates success
-      if (response && (response.success || response.id || response.message)) {
-        // Clear form
-        setFormData({
-          full_name: '',
-          email: '',
-          phone: '',
-          locality: '',
-          society: '',
-          address: '',
-          upi_id: '',
-        });
-        
-        // Stop loading
-        setLoading(false);
-        
-        // Show success modal immediately
-        setShowSuccessModal(true);
-        setError('');
-      } else {
-        throw new Error('Unexpected response from server');
-      }
+      // Always show success if we get here (response received)
+      // Clear form
+      setFormData({
+        full_name: '',
+        email: '',
+        phone: '',
+        locality: '',
+        society: '',
+        address: '',
+        upi_id: '',
+      });
+      
+      // Stop loading
+      setLoading(false);
+      
+      // Show success modal immediately
+      setShowSuccessModal(true);
+      setError('');
     } catch (err: any) {
+      // Stop loading on error
+      setLoading(false);
       setError(err.message || 'Failed to submit registration. Please try again.');
       setShowSuccessModal(false);
-      setLoading(false);
     }
   };
 
